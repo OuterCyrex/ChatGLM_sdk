@@ -2,7 +2,7 @@
 
 - [中文文档](README_zh.md)
 
-This is a ZhiPuQingYan**(智谱清言)** GLM SDK written in Go, used to interact with the ZhiPuGLM API. With this SDK, developers can easily send requests and handle responses.
+This is a ZhiPuQingYan **(智谱清言)** GLM SDK written in Go, used to interact with the ZhiPuGLM API. With this SDK, developers can easily send requests and handle responses.
 
 ## Installation
 
