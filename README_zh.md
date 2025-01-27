@@ -1,4 +1,4 @@
-# ZhiPuGLM-sdk for Go
+# ChatGLM_sdl for Go
 
 这是一个用Go语言编写的 **智谱清言**GLM SDK，用于与ZhiPuGLM API进行交互。通过这个SDK，开发者可以轻松地发送请求并处理响应。
 
@@ -7,12 +7,12 @@
 ## 安装
 
 ```sh
-go get -u github.com/OuterCyrex/ChatGLM_sdk
+go get -u github.com/OuterCyrex/ChatGLM_sdl
 ```
 
 ## 使用方法
 
-ZhiPuGLM-sdk为开发者提供了**同步接口**与**异步接口**：
+ChatGLM_sdl为开发者提供了**同步接口**与**异步接口**：
 
 | 接口            | 作用                           |
 | --------------- | ------------------------------ |
@@ -28,13 +28,13 @@ package main
 
 import (
     "fmt"
-    "github.com/OuterCyrex/ChatGLM_sdk"
+    "github.com/OuterCyrex/ChatGLM_sdl"
 )
 
 func main() {
     apiKey := "your-api-key"
-    client := ChatGLM_sdk.NewClient(apiKey)
-    ctx := ChatGLM_sdk.NewContext()
+    client := ChatGLM_sdl.NewClient(apiKey)
+    ctx := ChatGLM_sdl.NewContext()
 
     // 发送消息
     resp := client.SendSync(ctx, "Hello, how are you?")
@@ -69,14 +69,14 @@ func main() {
 ### 示例
 
 ```go
-client := ChatGLM_sdk.NewClient(apiKey, 
-    ChatGLM_sdk.SetUserID("user123"),
-    ChatGLM_sdk.DoNotSample(),
-    ChatGLM_sdk.SetTemperature(0.8),
-    ChatGLM_sdk.SetTopP(0.9),
-    ChatGLM_sdk.SetMaxToken(2048),
-    ChatGLM_sdk.SetResponseFormatJSON(),
-    ChatGLM_sdk.SetStopWord("stop"),
+client := ChatGLM_sdl.NewClient(apiKey, 
+    ChatGLM_sdl.SetUserID("user123"),
+    ChatGLM_sdl.DoNotSample(),
+    ChatGLM_sdl.SetTemperature(0.8),
+    ChatGLM_sdl.SetTopP(0.9),
+    ChatGLM_sdl.SetMaxToken(2048),
+    ChatGLM_sdl.SetResponseFormatJSON(),
+    ChatGLM_sdl.SetStopWord("stop"),
 )
 ```
 
