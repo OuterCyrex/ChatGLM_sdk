@@ -14,13 +14,14 @@ go get -u github.com/OuterCyrex/ChatGLM_sdk
 
 ZhiPuGLM-sdk为开发者提供了**同步接口**与**异步接口**：
 
-| 接口            | 作用                         |
-| --------------- | ---------------------------- |
-| SendSync        | 发送同步请求并返回模型回复   |
-| SendAsync       | 发送异步请求并返回消息ID     |
-| GetAsyncMessage | 通过消息ID获取异步的模型回复 |
+| 接口            | 作用                           |
+| --------------- | ------------------------------ |
+| SendSync        | 发送同步请求并返回模型回复     |
+| SendAsync       | 发送异步请求并返回消息ID       |
+| GetAsyncMessage | 通过消息ID获取异步的模型回复   |
+| SendStream      | 发送流式请求并返回流式响应通道 |
 
-### 初始化客户端并发送同步请求
+### 初始化客户端并发送请求
 
 ```go
 package main
@@ -49,45 +50,9 @@ func main() {
 }
 ```
 
-### 初始化客户端并发送异步请求
+更多用法请参考：
 
-```go
-package main
-
-import (
-	"fmt"
-	"github.com/OuterCyrex/ChatGLM_sdk"
-	"time"
-)
-
-func main() {
-    apiKey := "your-api-key"
-	client := ChatGLM_sdk.NewClient(apiKey)
-	ctx := ChatGLM_sdk.NewContext()
-
-    // 发送异步请求获取ID
-	id, err := client.SendAsync(ctx, "Hello, how are you?")
-
-	if err != nil {
-		fmt.Println("Error:", err)
-        return
-	}
-
-    // 等待GLM生成
-	time.Sleep(5 * time.Second)
-
-    // 通过SendAsync返回的ID来获取回复
-	resp := client.GetAsyncMessage(ctx, id)
-	if resp.Error != nil {
-		fmt.Println("Error:", resp.Error)
-        return
-	}
-
-	for _, v := range resp.Message {
-		fmt.Println(v)
-	}
-}
-```
+- [代码示例](example)
 
 ### 配置选项
 

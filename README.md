@@ -14,11 +14,12 @@ go get -u github.com/OuterCyrex/ChatGLM_sdk
 
 The ZhiPuGLM-sdk provides developers with **synchronous** and **asynchronous interfaces**:
 
-| Interface       | Function                                                   |
-| :-------------- | :--------------------------------------------------------- |
-| SendSync        | Send a synchronous request and return the model's reply    |
-| SendAsync       | Send an asynchronous request and return the message ID     |
-| GetAsyncMessage | Obtain the asynchronous model reply through the message ID |
+| Interface       | Function                                                     |
+| :-------------- | :----------------------------------------------------------- |
+| SendSync        | Send a synchronous request and return the model's reply      |
+| SendAsync       | Send an asynchronous request and return the message ID       |
+| GetAsyncMessage | Obtain the asynchronous model reply through the message ID   |
+| SendStream      | Send a streaming request and return a streaming response channel |
 
 ### Initialize Client and  Send Sync Request
 
@@ -49,45 +50,9 @@ func main() {
 }
 ```
 
-### Initialize Client and  Send Async Request
+For more examples, please see:
 
-```go
-package main
-
-import (
-	"fmt"
-	"github.com/OuterCyrex/ChatGLM_sdk"
-	"time"
-)
-
-func main() {
-    apiKey := "your-api-key"
-	client := ChatGLM_sdk.NewClient(apiKey)
-	ctx := ChatGLM_sdk.NewContext()
-
-    // send async message and get id
-	id, err := client.SendAsync(ctx, "Hello, how are you?")
-
-	if err != nil {
-		fmt.Println("Error:", err)
-        return
-	}
-
-    // wait for glm to generate
-	time.Sleep(5 * time.Second)
-
-    // get response by id returned by SendAsync
-	resp := client.GetAsyncMessage(ctx, id)
-	if resp.Error != nil {
-		fmt.Println("Error:", resp.Error)
-        return
-	}
-
-	for _, v := range resp.Message {
-		fmt.Println(v)
-	}
-}
-```
+- [coding examples](example)
 
 ### Configuration Options
 

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/OuterCyrex/ChatGLM_sdk/model"
 	"io"
 	"net/http"
@@ -113,7 +114,7 @@ func (client Client) SendSync(context *MessageContext, text string) Result {
 		return Result{
 			Tokens:  0,
 			Message: nil,
-			Error:   err,
+			Error:   fmt.Errorf("无法解析JSON文件: %v", err),
 		}
 	}
 

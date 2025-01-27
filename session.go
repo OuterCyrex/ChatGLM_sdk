@@ -8,6 +8,9 @@ const (
 	getAsyncUrl = "https://open.bigmodel.cn/api/paas/v4/async-result/"
 )
 
+// Result is the return value that contains
+// tokens consumed, messages returned from GLM,
+// as well as the error message.
 type Result struct {
 	Tokens  int32
 	Message []model.Message
