@@ -36,7 +36,7 @@ func main() {
     ctx := ChatGLM_sdk.NewContext()
 
     // Send message
-    resp := client.Send(ctx, "Hello, how are you?")
+    resp := client.SendSync(ctx, "Hello, how are you?")
     if resp.Error != nil {
         fmt.Println("Error:", resp.Error)
         return
