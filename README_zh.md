@@ -1,10 +1,10 @@
-# ZhiPuGLM SDK for Go
+# ZhiPuGLM-sdk for Go
 
 这是一个用Go语言编写的 **智谱清言**GLM SDK，用于与ZhiPuGLM API进行交互。通过这个SDK，开发者可以轻松地发送请求并处理响应。
 
-## 安装
+目前支持开发者向GLM发送同步请求与异步请求。
 
-sh复制
+## 安装
 
 ```sh
 go get -u github.com/OuterCyrex/ChatGLM_sdk
@@ -12,9 +12,15 @@ go get -u github.com/OuterCyrex/ChatGLM_sdk
 
 ## 使用方法
 
-### 初始化客户端
+ZhiPuGLM-sdk为开发者提供了**同步接口**与**异步接口**：
 
-go复制
+| 接口            | 作用                         |
+| --------------- | ---------------------------- |
+| SendSync        | 发送同步请求并返回模型回复   |
+| SendAsync       | 发送异步请求并返回消息ID     |
+| GetAsyncMessage | 通过消息ID获取异步的模型回复 |
+
+### 初始化客户端并发送同步请求
 
 ```go
 package main
@@ -43,6 +49,46 @@ func main() {
 }
 ```
 
+### 初始化客户端并发送异步请求
+
+```go
+package main
+
+import (
+	"fmt"
+	"github.com/OuterCyrex/ChatGLM_sdk"
+	"time"
+)
+
+func main() {
+    apiKey := "your-api-key"
+	client := ChatGLM_sdk.NewClient(apiKey)
+	ctx := ChatGLM_sdk.NewContext()
+
+    // 发送异步请求获取ID
+	id, err := client.SendAsync(ctx, "Hello, how are you?")
+
+	if err != nil {
+		fmt.Println("Error:", err)
+        return
+	}
+
+    // 等待GLM生成
+	time.Sleep(5 * time.Second)
+
+    // 通过SendAsync返回的ID来获取回复
+	resp := client.GetAsyncMessage(ctx, id)
+	if resp.Error != nil {
+		fmt.Println("Error:", resp.Error)
+        return
+	}
+
+	for _, v := range resp.Message {
+		fmt.Println(v)
+	}
+}
+```
+
 ### 配置选项
 
 你可以使用以下选项来自定义客户端的行为：
@@ -56,8 +102,6 @@ func main() {
 - `SetStopWord(stopWord string)`: 设置停止词。
 
 ### 示例
-
-go复制
 
 ```go
 client := ChatGLM_sdk.NewClient(apiKey, 

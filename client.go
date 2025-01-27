@@ -2,27 +2,24 @@ package ChatGLM_sdk
 
 // Client contains basic parameter information for communicating with GLM
 type Client struct {
-	Url            string
-	UserID         string
-	Model          string
-	APIKey         string
-	DoSample       bool
-	Temperature    float64
-	TopP           float64
-	MaxTokens      int
-	ResponseFormat string
-	Stop           string
+	userID         string
+	model          string
+	apiKey         string
+	doSample       bool
+	temperature    float64
+	topP           float64
+	maxTokens      int
+	responseFormat string
+	stop           string
 }
-
-const url = "https://open.bigmodel.cn/api/paas/v4/chat/completions"
 
 type Option func(client *Client) *Client
 
-// SetUserID allows developers to set the UserID information
+// SetUserID allows developers to set the userID information
 // when calling NewClient
 func SetUserID(userID string) Option {
 	return func(client *Client) *Client {
-		client.UserID = userID
+		client.userID = userID
 		return client
 	}
 }
@@ -31,16 +28,16 @@ func SetUserID(userID string) Option {
 // when calling NewClient
 func DoNotSample() Option {
 	return func(client *Client) *Client {
-		client.DoSample = false
+		client.doSample = false
 		return client
 	}
 }
 
-// SetTemperature allows developers to set the Temperature information
+// SetTemperature allows developers to set the temperature information
 // when calling NewClient
 func SetTemperature(temperature float64) Option {
 	return func(client *Client) *Client {
-		client.Temperature = temperature
+		client.temperature = temperature
 		return client
 	}
 }
@@ -49,7 +46,7 @@ func SetTemperature(temperature float64) Option {
 // when calling NewClient
 func SetTopP(topP float64) Option {
 	return func(client *Client) *Client {
-		client.TopP = topP
+		client.topP = topP
 		return client
 	}
 }
@@ -61,21 +58,21 @@ func SetMaxToken(maxToken int) Option {
 	return func(client *Client) *Client {
 		switch {
 		case maxToken > 4095:
-			client.MaxTokens = 4095
+			client.maxTokens = 4095
 		case maxToken < 128:
-			client.MaxTokens = 128
+			client.maxTokens = 128
 		default:
-			client.MaxTokens = maxToken
+			client.maxTokens = maxToken
 		}
 		return client
 	}
 }
 
-// SetResponseFormatJSON allows developers to set the ResponseFormat
+// SetResponseFormatJSON allows developers to set the responseFormat
 // to JSON format when calling NewClient. The default value is plain text.
 func SetResponseFormatJSON() Option {
 	return func(client *Client) *Client {
-		client.ResponseFormat = "json_object"
+		client.responseFormat = "json_object"
 		return client
 	}
 }
@@ -84,7 +81,7 @@ func SetResponseFormatJSON() Option {
 // when calling NewClient.
 func SetStopWord(stopWord string) Option {
 	return func(client *Client) *Client {
-		client.Stop = stopWord
+		client.stop = stopWord
 		return client
 	}
 }
@@ -93,16 +90,15 @@ func SetStopWord(stopWord string) Option {
 // a new session and connect to the GLM.
 func NewClient(APIKey string, opt ...Option) *Client {
 	client := &Client{
-		Url:            url,
-		Model:          "glm-4",
-		APIKey:         APIKey,
-		UserID:         "",
-		DoSample:       true,
-		Temperature:    0.95,
-		TopP:           0.70,
-		MaxTokens:      0,
-		ResponseFormat: "text",
-		Stop:           "",
+		model:          "glm-4",
+		apiKey:         APIKey,
+		userID:         "",
+		doSample:       true,
+		temperature:    0.95,
+		topP:           0.70,
+		maxTokens:      0,
+		responseFormat: "text",
+		stop:           "",
 	}
 
 	if len(opt) > 0 {

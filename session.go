@@ -1,7 +1,25 @@
 package ChatGLM_sdk
 
-import "ChatGLM_sdk/model"
+import "github.com/OuterCyrex/ChatGLM_sdk/model"
 
-func NewContext() MessageContext {
-	return make([]model.Message, 0)
+const (
+	SyncUrl     = "https://open.bigmodel.cn/api/paas/v4/chat/completions"
+	AsyncUrl    = "https://open.bigmodel.cn/api/paas/v4/async/chat/completions"
+	getAsyncUrl = "https://open.bigmodel.cn/api/paas/v4/async-result/"
+)
+
+type Result struct {
+	Tokens  int32
+	Message []model.Message
+	Error   error
+}
+
+// MessageContext is the dialog context for GLM
+// to recognize what was said before
+type MessageContext []model.Message
+
+// NewContext create a new background dialog context
+func NewContext() *MessageContext {
+	var ctx MessageContext
+	return &ctx
 }

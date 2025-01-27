@@ -1,6 +1,6 @@
 package model
 
-type ChatGLMResponse struct {
+type ChatGLMSyncResponse struct {
 	Choices   []Choice `json:"choices"`
 	Created   int64    `json:"created"`
 	ID        string   `json:"id"`
