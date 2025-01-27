@@ -7,12 +7,12 @@ This is a ZhiPuQingYan **(智谱清言)** GLM SDK written in Go, used to interac
 ## Installation
 
 ```sh
-go get -u github.com/OuterCyrex/ChatGLM_sdl
+go get -u github.com/OuterCyrex/ChatGLM_sdk
 ```
 
 ## Usage
 
-The ChatGLM_sdl provides developers with **synchronous** and **asynchronous interfaces**:
+The ChatGLM_sdk provides developers with **synchronous** and **asynchronous interfaces**:
 
 | Interface       | Function                                                     |
 | :-------------- | :----------------------------------------------------------- |
@@ -28,13 +28,13 @@ package main
 
 import (
     "fmt"
-    "github.com/OuterCyrex/ChatGLM_sdl"
+    "github.com/OuterCyrex/ChatGLM_sdk"
 )
 
 func main() {
     apiKey := "your-api-key"
-    client := ChatGLM_sdl.NewClient(apiKey)
-    ctx := ChatGLM_sdl.NewContext()
+    client := ChatGLM_sdk.NewClient(apiKey)
+    ctx := ChatGLM_sdk.NewContext()
 
     // Send message
     resp := client.SendSync(ctx, "Hello, how are you?")
@@ -69,14 +69,14 @@ You can use the following options to customize the behavior of the client:
 ### Example
 
 ```go
-client := ChatGLM_sdl.NewClient(apiKey, 
-    ChatGLM_sdl.SetUserID("user123"),
-    ChatGLM_sdl.DoNotSample(),
-    ChatGLM_sdl.SetTemperature(0.8),
-    ChatGLM_sdl.SetTopP(0.9),
-    ChatGLM_sdl.SetMaxToken(2048),
-    ChatGLM_sdl.SetResponseFormatJSON(),
-    ChatGLM_sdl.SetStopWord("stop"),
+client := ChatGLM_sdk.NewClient(apiKey, 
+    ChatGLM_sdk.SetUserID("user123"),
+    ChatGLM_sdk.DoNotSample(),
+    ChatGLM_sdk.SetTemperature(0.8),
+    ChatGLM_sdk.SetTopP(0.9),
+    ChatGLM_sdk.SetMaxToken(2048),
+    ChatGLM_sdk.SetResponseFormatJSON(),
+    ChatGLM_sdk.SetStopWord("stop"),
 )
 ```
 
