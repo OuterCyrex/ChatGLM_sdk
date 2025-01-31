@@ -12,9 +12,10 @@ const (
 // tokens consumed, messages returned from GLM,
 // as well as the error message.
 type Result struct {
-	Tokens  int32
-	Message []model.Message
-	Error   error
+	Tokens       int32
+	Message      []model.Message
+	Error        error
+	FinishReason string
 }
 
 // MessageContext is the dialog context for GLM

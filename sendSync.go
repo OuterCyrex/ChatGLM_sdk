@@ -3,7 +3,6 @@ package ChatGLM_sdk
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/OuterCyrex/ChatGLM_sdk/model"
 	"io"
@@ -49,31 +48,33 @@ func (client Client) SendSync(context *MessageContext, text string) Result {
 	reqBody, err := json.Marshal(message)
 	if err != nil {
 		return Result{
-			Tokens:  0,
-			Message: nil,
-			Error:   err,
+			Tokens:       0,
+			Message:      nil,
+			Error:        ErrSdkInternal,
+			FinishReason: "",
 		}
 	}
 
 	req, err := http.NewRequest("POST", SyncUrl, bytes.NewBuffer(reqBody))
 	if err != nil {
 		return Result{
-			Tokens:  0,
-			Message: nil,
-			Error:   err,
+			Tokens:       0,
+			Message:      nil,
+			Error:        ErrHttpRequestTimeOut,
+			FinishReason: "",
 		}
 	}
 
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+client.apiKey)
 
-	c := &http.Client{}
-	respBody, err := c.Do(req)
+	respBody, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return Result{
-			Tokens:  0,
-			Message: nil,
-			Error:   err,
+			Tokens:       0,
+			Message:      nil,
+			Error:        ErrHttpRequestTimeOut,
+			FinishReason: "",
 		}
 	}
 
@@ -82,28 +83,29 @@ func (client Client) SendSync(context *MessageContext, text string) Result {
 	err = respBody.Body.Close()
 	if err != nil {
 		return Result{
-			Tokens:  0,
-			Message: nil,
-			Error:   err,
+			Tokens:       0,
+			Message:      nil,
+			Error:        ErrHttpRequestTimeOut,
+			FinishReason: "",
 		}
 	}
 
 	if respBody.StatusCode >= 400 {
-		var errResp model.ErrorResponse
-		err = json.Unmarshal(body, &errResp)
-
-		if err != nil {
+		switch respBody.StatusCode {
+		case 404:
 			return Result{
-				Tokens:  0,
-				Message: nil,
-				Error:   err,
+				Tokens:       0,
+				Message:      nil,
+				Error:        ErrNotFound,
+				FinishReason: "",
 			}
-		}
-
-		return Result{
-			Tokens:  0,
-			Message: nil,
-			Error:   errors.New(errResp.Error.Message),
+		default:
+			return Result{
+				Tokens:       0,
+				Message:      nil,
+				Error:        fmt.Errorf("%w: %q", ErrHttpBadRequest, http.StatusText(respBody.StatusCode)),
+				FinishReason: "",
+			}
 		}
 	}
 
@@ -112,15 +114,16 @@ func (client Client) SendSync(context *MessageContext, text string) Result {
 	err = json.Unmarshal(body, &resp)
 	if err != nil {
 		return Result{
-			Tokens:  0,
-			Message: nil,
-			Error:   fmt.Errorf("无法解析JSON文件: %v", err),
+			Tokens:       0,
+			Message:      nil,
+			Error:        ErrSdkInternal,
+			FinishReason: "",
 		}
 	}
 
 	var ms []model.Message
 
-	stopErr := error(nil)
+	var finishReason string
 
 	for _, c := range resp.Choices {
 		ms = append(ms, c.Message)
@@ -128,11 +131,13 @@ func (client Client) SendSync(context *MessageContext, text string) Result {
 			Role:    c.Message.Role,
 			Content: c.Message.Content,
 		})
+		finishReason = c.FinishReason
 	}
 
 	return Result{
-		Tokens:  int32(resp.Usage.TotalTokens),
-		Message: ms,
-		Error:   stopErr,
+		Tokens:       int32(resp.Usage.TotalTokens),
+		Message:      ms,
+		Error:        nil,
+		FinishReason: finishReason,
 	}
 }

@@ -4,11 +4,10 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/OuterCyrex/ChatGLM_sdk/model"
-	"io"
 	"net/http"
+	"strings"
 )
 
 // SendStream allows developers to communicate with GLM with the given
@@ -22,7 +21,7 @@ func (client Client) SendStream(context *MessageContext, text string) <-chan Res
 		Content: text,
 	})
 
-	var assistantResp string
+	var assistantResp strings.Builder
 
 	message := model.ChatGLMRequest{
 		Model:       client.model,
@@ -51,9 +50,10 @@ func (client Client) SendStream(context *MessageContext, text string) <-chan Res
 	reqBody, err := json.Marshal(message)
 	if err != nil {
 		messageChannel <- Result{
-			Tokens:  0,
-			Message: nil,
-			Error:   err,
+			Tokens:       0,
+			Message:      nil,
+			Error:        ErrSdkInternal,
+			FinishReason: "",
 		}
 		close(messageChannel)
 		return messageChannel
@@ -62,9 +62,10 @@ func (client Client) SendStream(context *MessageContext, text string) <-chan Res
 	req, err := http.NewRequest("POST", SyncUrl, bytes.NewBuffer(reqBody))
 	if err != nil {
 		messageChannel <- Result{
-			Tokens:  0,
-			Message: nil,
-			Error:   err,
+			Tokens:       0,
+			Message:      nil,
+			Error:        ErrHttpRequestTimeOut,
+			FinishReason: "",
 		}
 		close(messageChannel)
 		return messageChannel
@@ -77,9 +78,10 @@ func (client Client) SendStream(context *MessageContext, text string) <-chan Res
 		respBody, err := http.DefaultClient.Do(req)
 		if err != nil {
 			messageChannel <- Result{
-				Tokens:  0,
-				Message: nil,
-				Error:   err,
+				Tokens:       0,
+				Message:      nil,
+				Error:        ErrHttpRequestTimeOut,
+				FinishReason: "",
 			}
 			close(messageChannel)
 			return
@@ -88,27 +90,26 @@ func (client Client) SendStream(context *MessageContext, text string) <-chan Res
 		defer respBody.Body.Close()
 
 		if respBody.StatusCode >= 400 {
-			var errResp model.ErrorResponse
-			body, _ := io.ReadAll(respBody.Body)
-			err = json.Unmarshal(body, &errResp)
-
-			if err != nil {
+			switch respBody.StatusCode {
+			case 404:
 				messageChannel <- Result{
-					Tokens:  0,
-					Message: nil,
-					Error:   err,
+					Tokens:       0,
+					Message:      nil,
+					Error:        ErrNotFound,
+					FinishReason: "",
+				}
+				close(messageChannel)
+				return
+			default:
+				messageChannel <- Result{
+					Tokens:       0,
+					Message:      nil,
+					Error:        fmt.Errorf("%w: %q", ErrHttpBadRequest, http.StatusText(respBody.StatusCode)),
+					FinishReason: "",
 				}
 				close(messageChannel)
 				return
 			}
-
-			messageChannel <- Result{
-				Tokens:  0,
-				Message: nil,
-				Error:   errors.New(errResp.Error.Message),
-			}
-			close(messageChannel)
-			return
 		}
 
 		scanner := bufio.NewScanner(respBody.Body)
@@ -119,9 +120,10 @@ func (client Client) SendStream(context *MessageContext, text string) <-chan Res
 				var resp model.ChatGLMStreamResponse
 				if err = json.Unmarshal([]byte(line[6:]), &resp); err != nil {
 					messageChannel <- Result{
-						Tokens:  0,
-						Message: nil,
-						Error:   fmt.Errorf("无法解析JSON文件: %v. Line: %s", err, line),
+						Tokens:       0,
+						Message:      nil,
+						Error:        ErrSdkInternal,
+						FinishReason: "",
 					}
 					close(messageChannel)
 					return
@@ -136,18 +138,20 @@ func (client Client) SendStream(context *MessageContext, text string) <-chan Res
 									Role:    v.Delta.Role,
 									Content: v.Delta.Content,
 								}},
-							Error: nil,
+							Error:        nil,
+							FinishReason: "",
 						}
-						assistantResp += v.Delta.Content
+						assistantResp.WriteString(v.Delta.Content)
 					} else {
 						messageChannel <- Result{
-							Tokens:  int32(resp.Usage.TotalTokens),
-							Message: nil,
-							Error:   nil,
+							Tokens:       int32(resp.Usage.TotalTokens),
+							FinishReason: v.FinishReason,
+							Message:      nil,
+							Error:        nil,
 						}
 						*context = append(*context, model.Message{
 							Role:    v.Delta.Role,
-							Content: assistantResp,
+							Content: assistantResp.String(),
 						})
 						close(messageChannel)
 						return
@@ -157,9 +161,10 @@ func (client Client) SendStream(context *MessageContext, text string) <-chan Res
 
 			if err := scanner.Err(); err != nil {
 				messageChannel <- Result{
-					Tokens:  0,
-					Message: nil,
-					Error:   err,
+					Tokens:       0,
+					Message:      nil,
+					Error:        ErrSdkInternal,
+					FinishReason: "",
 				}
 				close(messageChannel)
 				return
