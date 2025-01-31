@@ -128,9 +128,6 @@ func (client Client) SendSync(context *MessageContext, text string) Result {
 			Role:    c.Message.Role,
 			Content: c.Message.Content,
 		})
-		if c.FinishReason != "stop" {
-			stopErr = errors.New(c.FinishReason)
-		}
 	}
 
 	return Result{

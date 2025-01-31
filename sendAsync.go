@@ -188,9 +188,6 @@ func (client Client) GetAsyncMessage(context *MessageContext, ID string) Result 
 			Role:    c.Message.Role,
 			Content: c.Message.Content,
 		})
-		if c.FinishReason != "stop" {
-			stopErr = errors.New(c.FinishReason)
-		}
 	}
 
 	return Result{
